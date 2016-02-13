@@ -4,12 +4,13 @@ import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.Collections;
 import processing.core.PApplet;
+import ddf.minim.*;
 
 //when in doubt, consult the Processsing reference: https://processing.org/reference/
 
 int margin = 200; //set the margina around the squares
 final int padding = 50; // padding between buttons and also their width/height
-final int buttonSize = 40; // padding between buttons and also their width/height
+final int buttonSize = 50; // padding between buttons and also their width/height
 ArrayList<Integer> trials = new ArrayList<Integer>(); //contains the order of buttons that activate in the test
 int trialNum = 0; //the current trial number (indexes into trials array above)
 int startTime = 0; // time starts when the first click is captured
@@ -19,8 +20,11 @@ int misses = 0; //number of missed clicks
 Robot robot; //initalized in setup
 Rectangle currentBox;
 Rectangle nextBox;
+Minim minim;
+AudioPlayer clickSound;
 
 int numRepeats = 1; //sets the number of times each button repeats in the test
+boolean blink = true;
 
 void setup()
 {
@@ -33,6 +37,8 @@ void setup()
   ellipseMode(CENTER); //ellipses are drawn from the center (BUT RECTANGLES ARE NOT!)
   //rectMode(CENTER); //enabling will break the scaffold code, but you might find it easier to work with centered rects
 
+  minim = new Minim(this);
+  clickSound = minim.loadFile("Click2.wav");
   try {
     robot = new Robot(); //create a "Java Robot" class that can move the system cursor
   } 
@@ -56,11 +62,12 @@ void setup()
 
 void draw()
 {
-  background(0); //set background to black
+  background(255); //set background to black
 
   if (trialNum >= trials.size()) //check to see if test is over
   {
-    fill(255); //set fill color to white
+    textSize(20);
+    fill(0); //set fill color to white
     //write to screen (not console)
     text("Finished!", width / 2, height / 2); 
     text("Hits: " + hits, width / 2, height / 2 + 20);
@@ -72,19 +79,20 @@ void draw()
   }
   
   if(currentBox !=null && nextBox != null) {
-    stroke(255);
+    stroke(120);
     line(currentBox.x+currentBox.width/2.0, currentBox.y+currentBox.height/2.0, nextBox.x+nextBox.width/2.0, nextBox.y+nextBox.height/2.0);
     noStroke();
   }
 
-  fill(255); //set fill color to white
-  text((trialNum + 1) + " of " + trials.size(), 40, 20); //display what trial the user is on
+  textSize(30);
+  fill(0); //set fill color to white
+  text((trialNum + 1) + " of " + trials.size(), 80, 40); //display what trial the user is on
 
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
 
-  fill(255, 0, 0, 200); // set fill color to translucent red
-  //ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
+  // fill(255, 0, 0, 200); // set fill color to translucent red
+  // ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
 }
 
 void mousePressed() // test to see if hit was in target!
@@ -108,11 +116,13 @@ void mousePressed() // test to see if hit was in target!
 
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
 
- //check to see if mouse cursor is inside button 
+ //check to see if mouse cursor is inside correct button 
   if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
+    clickSound.play();
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
     hits++; 
+    clickSound.rewind();
   } 
   else
   {
@@ -123,7 +133,7 @@ void mousePressed() // test to see if hit was in target!
   trialNum++; //Increment trial number
 
   //in this example code, we move the mouse back to the middle
-  //robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
+  // robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
 }  
 
 //probably shouldn't have to edit this method
@@ -143,20 +153,25 @@ void drawButton(int i)
     if(isMouseInside(bounds)) {
      fill(125);
      rect(bounds.x-10, bounds.y-10, bounds.width+20, bounds.height+20);
-     fill(0);
+     fill(255);
      rect(bounds.x-5, bounds.y-5, bounds.width+10, bounds.height+10);
     }
-  
-    fill(255, 0, 0); // if so, fill cyan
+    
+    // Handles blink factor in current box. 
+    if (frameCount % 9 == 0) 
+      fill(255, 255, 255); // Change to black to enable blinking
+    else
+      fill(255, 0, 0); // if so, fill cyan
     rect(bounds.x+8, bounds.y+8, bounds.width-16, bounds.height-16);
+    
   }
-  else if ((trialNum +1 < 16) && trials.get(trialNum+1) == i) { 
+  else if ((trialNum +1 < trials.size()) && trials.get(trialNum+1) == i) { 
     nextBox = bounds;
-    fill(90, 50, 50); // if so, fill cyan
+    fill(90, 50, 50); // if so, fill with lighter cyan
     rect(bounds.x+8, bounds.y+8, bounds.width-16, bounds.height-16);
   }
   else {
-    fill(50); // if not, fill gray
+    fill(100); // if not, fill gray
     rect(bounds.x+8, bounds.y+8, bounds.width-16, bounds.height-16);
     //rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
   }
@@ -166,7 +181,11 @@ boolean isMouseInside(Rectangle b) {
   return mouseX > b.x && mouseX < (b.x + b.width) && mouseY > b.y && mouseY < (b.y + b.height);
 }
 
-
+// In case sound file plays longer than program, this stops it. 
+void stop() {
+  minim.stop();
+  super.stop();
+}
 
 void mouseMoved()
 {
@@ -177,7 +196,7 @@ void mouseMoved()
 void mouseDragged()
 {
   //can do stuff everytime the mouse is dragged
-  //https://processing.org/reference/mouseDragged_.html
+  //https://processing.org/reference/mouseDragged_.html 
 }
 
 void keyPressed() 
