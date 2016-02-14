@@ -140,10 +140,10 @@ void mousePressed() // test to see if hit was in target!
 int findClosestButton()
 {
   double min = getMouseButtonDistance(0);
-  int index = 0;
+  int index = -1;
   for(int i=1; i<16; ++i) {
     double dist = getMouseButtonDistance(i);
-    if(dist < min) {
+    if(dist < min && dist < 100d) { // 100 is the threshold
       min = dist;
       index = i;
     }
