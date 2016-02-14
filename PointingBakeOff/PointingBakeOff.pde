@@ -1,3 +1,10 @@
+import ddf.minim.*;
+import ddf.minim.analysis.*;
+import ddf.minim.effects.*;
+import ddf.minim.signals.*;
+import ddf.minim.spi.*;
+import ddf.minim.ugens.*;
+
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -80,13 +87,14 @@ void draw()
   
   if(currentBox !=null && nextBox != null) {
     stroke(120);
+    //arrow((currentBox.x+currentBox.width/2.0), (currentBox.y+currentBox.height/2.0), (nextBox.x+nextBox.width/2.0), (nextBox.y+nextBox.height/2.0));
     line(currentBox.x+currentBox.width/2.0, currentBox.y+currentBox.height/2.0, nextBox.x+nextBox.width/2.0, nextBox.y+nextBox.height/2.0);
     noStroke();
   }
 
   textSize(30);
   fill(0); //set fill color to white
-  text((trialNum + 1) + " of " + trials.size(), 80, 40); //display what trial the user is on
+  text((trialNum +  1) + " of " + trials.size(), 80, 40); //display what trial the user is on
 
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
@@ -167,6 +175,19 @@ double getMouseButtonDistance(int i)
   return Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
 }
 
+void arrow(float x1, float y1, float x2, float y2) {
+      // draw the line
+    line(x1, y1, x2, y2);
+    
+    // draw a triangle at (x2, y2)
+    pushMatrix();
+     rotate(atan2(y2-y1, x2-x1));
+     translate((x2+x1)/2, (y2+y1)/2);
+     triangle(0, 0, -10, 5, -10, -5);
+    popMatrix(); 
+    
+} 
+
 void drawButton(int i)
 {
   Rectangle bounds = getButtonLocation(i);
@@ -181,8 +202,8 @@ void drawButton(int i)
     }
     
     // Handles blink factor in current box. 
-    if (frameCount % 9 == 0) 
-      fill(255, 255, 255); // Change to black to enable blinking
+    if (frameCount % 10 < 5) 
+      fill(255, 150, 150); // Change to light red to enable blinking
     else
       fill(255, 0, 0); // if so, fill cyan
     rect(bounds.x+8, bounds.y+8, bounds.width-16, bounds.height-16);
@@ -190,7 +211,7 @@ void drawButton(int i)
   }
   else if ((trialNum +1 < trials.size()) && trials.get(trialNum+1) == i) { 
     nextBox = bounds;
-    fill(90, 50, 50); // if so, fill with lighter cyan
+    fill(180, 80, 80); // if so, fill with lighter cyan
     rect(bounds.x+8, bounds.y+8, bounds.width-16, bounds.height-16);
   }
   else {
