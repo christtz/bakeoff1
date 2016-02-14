@@ -117,7 +117,7 @@ void mousePressed() // test to see if hit was in target!
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
 
  //check to see if mouse cursor is inside correct button 
-  if ((mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
+  if (findClosestButton() == trials.get(trialNum) || (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
     clickSound.play();
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
@@ -134,7 +134,22 @@ void mousePressed() // test to see if hit was in target!
 
   //in this example code, we move the mouse back to the middle
   // robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
-}  
+}
+
+//find closest button
+int findClosestButton()
+{
+  double min = getMouseButtonDistance(0);
+  int index = 0;
+  for(int i=1; i<16; ++i) {
+    double dist = getMouseButtonDistance(i);
+    if(dist < min) {
+      min = dist;
+      index = i;
+    }
+  }
+  return index;
+}
 
 //probably shouldn't have to edit this method
 Rectangle getButtonLocation(int i) //for a given button ID, what is its location and size
@@ -142,6 +157,14 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
    int x = (i % 4) * (padding + buttonSize) + margin;
    int y = (i / 4) * (padding + buttonSize) + margin;
    return new Rectangle(x, y, buttonSize, buttonSize);
+}
+
+//get mouse button distance
+double getMouseButtonDistance(int i)
+{
+  int x = (i % 4) * (padding + buttonSize) + margin + buttonSize / 2;
+  int y = (i / 4) * (padding + buttonSize) + margin + buttonSize / 2;
+  return Math.sqrt(Math.pow(mouseX - x, 2) + Math.pow(mouseY - y, 2));
 }
 
 void drawButton(int i)
