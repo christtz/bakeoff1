@@ -1,10 +1,3 @@
-import ddf.minim.*;
-import ddf.minim.analysis.*;
-import ddf.minim.effects.*;
-import ddf.minim.signals.*;
-import ddf.minim.spi.*;
-import ddf.minim.ugens.*;
-
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.Robot;
@@ -123,7 +116,7 @@ void mousePressed() // test to see if hit was in target!
   }
 
   Rectangle bounds = getButtonLocation(trials.get(trialNum));
-
+    
  //check to see if mouse cursor is inside correct button 
   if (findClosestButton() == trials.get(trialNum) || (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
   {
@@ -136,8 +129,7 @@ void mousePressed() // test to see if hit was in target!
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
     misses++;
-  }
-
+  }  
   trialNum++; //Increment trial number
 
   //in this example code, we move the mouse back to the middle
