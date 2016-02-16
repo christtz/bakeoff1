@@ -30,7 +30,7 @@ Rectangle nextBox;
 Minim minim;
 AudioPlayer clickSound;
 
-int numRepeats = 1; //sets the number of times each button repeats in the test
+int numRepeats = 3; //sets the number of times each button repeats in the test
 boolean blink = true;
 
 void setup()
@@ -85,20 +85,37 @@ void draw()
     return; //return, nothing else to do now test is over
   }
   
-  if(currentBox !=null && nextBox != null) {
-    stroke(120);
-    //arrow((currentBox.x+currentBox.width/2.0), (currentBox.y+currentBox.height/2.0), (nextBox.x+nextBox.width/2.0), (nextBox.y+nextBox.height/2.0));
-    line(currentBox.x+currentBox.width/2.0, currentBox.y+currentBox.height/2.0, nextBox.x+nextBox.width/2.0, nextBox.y+nextBox.height/2.0);
-    noStroke();
-  }
+  
 
   textSize(30);
   fill(0); //set fill color to white
   text((trialNum +  1) + " of " + trials.size(), 80, 40); //display what trial the user is on
-
+  
+  
+   
+  if(trialNum < trials.size()-1 && currentBox != null && nextBox != null) {
+    if(isMouseInside(currentBox)) {
+     fill(125);
+     rect(currentBox.x-10, currentBox.y-10, currentBox.width+20, currentBox.height+20);
+     fill(255);
+     rect(currentBox.x-5, currentBox.y-5, currentBox.width+10, currentBox.height+10);
+   }
+    stroke(120);
+    //arrow((currentBox.x+currentBox.width/2.0), (currentBox.y+currentBox.height/2.0), (nextBox.x+nextBox.width/2.0), (nextBox.y+nextBox.height/2.0));
+    if(currentBox.equals(nextBox)) {
+      noFill();
+      ellipse(currentBox.x+10, currentBox.y+10, 30, 30);
+      //text("Double Tap!", currentBox.x+50, currentBox.y+50);
+    }
+    else
+    line(currentBox.x+currentBox.width/2.0, currentBox.y+currentBox.height/2.0, nextBox.x+nextBox.width/2.0, nextBox.y+nextBox.height/2.0);
+    noStroke();
+  }
+  
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
-
+  
+  
   // fill(255, 0, 0, 200); // set fill color to translucent red
   // ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
 }
@@ -194,12 +211,7 @@ void drawButton(int i)
 
   if (trials.get(trialNum) == i) { // see if current button is the target
     currentBox = bounds;
-    if(isMouseInside(bounds)) {
-     fill(125);
-     rect(bounds.x-10, bounds.y-10, bounds.width+20, bounds.height+20);
-     fill(255);
-     rect(bounds.x-5, bounds.y-5, bounds.width+10, bounds.height+10);
-    }
+    
     
     // Handles blink factor in current box. 
     if (frameCount % 10 < 5) 
