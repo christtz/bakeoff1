@@ -14,6 +14,7 @@ final int buttonSize = 50; // padding between buttons and also their width/heigh
 ArrayList<Integer> trials = new ArrayList<Integer>(); //contains the order of buttons that activate in the test
 int trialNum = 0; //the current trial number (indexes into trials array above)
 int startTime = 0; // time starts when the first click is captured
+int lastTrialTime = 0;  // time for last trial. (initially it is 0;)
 int finishTime = 0; //records the time of the final click
 int hits = 0; //number of successful clicks
 int misses = 0; //number of missed clicks
@@ -22,8 +23,12 @@ Rectangle currentBox;
 Rectangle nextBox;
 Minim minim;
 AudioPlayer clickSound;
+int userID = 1;  // User ID. Set this to 1, 2, 3, or 4 (1 = Tim, 2 = Chloe, 3 = Christtia, 4 = Tao
+int cursorXBeforeTrial = 0;   // Mouse position at time of last hit
+int cursorYBeforeTrial = 0;   // Mouse position at time of last hit
+Boolean isHit = false;
 
-int numRepeats = 3; //sets the number of times each button repeats in the test
+int numRepeats = 10; //sets the number of times each button repeats in the test  (Set this to 10)
 boolean blink = true;
 
 void setup()
@@ -121,6 +126,27 @@ void mousePressed() // test to see if hit was in target!
   if (trialNum == 0) //check if first click, if so, start timer
     startTime = millis();
 
+  Rectangle bounds = getButtonLocation(trials.get(trialNum));
+    
+ //check to see if mouse cursor is inside correct button 
+  if (findClosestButton() == trials.get(trialNum) || (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
+  {
+    clickSound.play();
+    isHit = true;
+    hits++; 
+    clickSound.rewind();
+  } 
+  else
+  {
+    isHit = false;
+    misses++;
+  }  
+  System.out.println(trialNum + 1 + " " + userID + " " + cursorXBeforeTrial + " " + cursorYBeforeTrial + " " + (bounds.x+(bounds.width)/2) + " " + (bounds.y+(bounds.height)/2) + " " + 
+  bounds.width + " " + (millis() - lastTrialTime) + " " + isHit); // success
+  lastTrialTime = millis();  // New last trial Time set
+  cursorXBeforeTrial = mouseX;  
+  cursorYBeforeTrial = mouseY;
+  
   if (trialNum == trials.size() - 1) //check if final click
   {
     finishTime = millis();
@@ -131,24 +157,10 @@ void mousePressed() // test to see if hit was in target!
     println("Total time taken: " + (finishTime-startTime) / 1000f + " sec");
     println("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec");
   }
-
-  Rectangle bounds = getButtonLocation(trials.get(trialNum));
-    
- //check to see if mouse cursor is inside correct button 
-  if (findClosestButton() == trials.get(trialNum) || (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && (mouseY > bounds.y && mouseY < bounds.y + bounds.height)) // test to see if hit was within bounds
-  {
-    clickSound.play();
-    System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
-    hits++; 
-    clickSound.rewind();
-  } 
-  else
-  {
-    System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
-    misses++;
-  }  
+  
   trialNum++; //Increment trial number
 
+ 
   //in this example code, we move the mouse back to the middle
   // robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
 }
