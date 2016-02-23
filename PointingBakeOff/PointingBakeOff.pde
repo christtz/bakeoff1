@@ -1,6 +1,12 @@
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import processing.core.PApplet;
@@ -23,10 +29,16 @@ Rectangle currentBox;
 Rectangle nextBox;
 Minim minim;
 AudioPlayer clickSound;
-int userID = 1;  // User ID. Set this to 1, 2, 3, or 4 (1 = Tim, 2 = Chloe, 3 = Christtia, 4 = Tao
+int userID = 4;  // User ID. Set this to 1, 2, 3, or 4 (1 = Tim, 2 = Chloe, 3 = Christtia, 4 = Tao
 int cursorXBeforeTrial = 0;   // Mouse position at time of last hit
 int cursorYBeforeTrial = 0;   // Mouse position at time of last hit
 Boolean isHit = false;
+double closestThreshold = 150d; 
+
+// file path
+String path;
+PrintWriter output;
+boolean wrote = false;
 
 int numRepeats = 10; //sets the number of times each button repeats in the test  (Set this to 10)
 boolean blink = true;
@@ -62,6 +74,9 @@ void setup()
   System.out.println("trial order: " + trials);
   
   frame.setLocation(0,0); // put window in top left corner of screen (doesn't always work)
+  
+  path = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")) + '_' + userID + ".csv";
+  output = createWriter(path);
 }
 
 
@@ -79,7 +94,15 @@ void draw()
     text("Misses: " + misses, width / 2, height / 2 + 40);
     text("Accuracy: " + (float)hits*100f/(float)(hits+misses) +"%", width / 2, height / 2 + 60);
     text("Total time taken: " + (finishTime-startTime) / 1000f + " sec", width / 2, height / 2 + 80);
-    text("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec", width / 2, height / 2 + 100);      
+    text("Average time for each button: " + ((finishTime-startTime) / 1000f)/(float)(hits+misses) + " sec", width / 2, height / 2 + 100);
+    
+    // write to file
+    if(!wrote) {
+      wrote = true;
+      output.flush();
+      output.close();
+    }
+    
     return; //return, nothing else to do now test is over
   }
   
@@ -141,8 +164,11 @@ void mousePressed() // test to see if hit was in target!
     isHit = false;
     misses++;
   }  
-  System.out.println(trialNum + 1 + " " + userID + " " + cursorXBeforeTrial + " " + cursorYBeforeTrial + " " + (bounds.x+(bounds.width)/2) + " " + (bounds.y+(bounds.height)/2) + " " + 
-  bounds.width + " " + (millis() - lastTrialTime) + " " + isHit); // success
+  String outputLine = trialNum + 1 + "," + userID + "," + cursorXBeforeTrial + "," + cursorYBeforeTrial + "," + (bounds.x+(bounds.width)/2) + "," + (bounds.y+(bounds.height)/2) + "," + 
+    bounds.width + "," + (millis() - lastTrialTime) + "," + (isHit?1:0); // success
+  System.out.println(outputLine);
+  output.println(outputLine);
+  
   lastTrialTime = millis();  // New last trial Time set
   cursorXBeforeTrial = mouseX;  
   cursorYBeforeTrial = mouseY;
@@ -168,11 +194,11 @@ void mousePressed() // test to see if hit was in target!
 //find closest button
 int findClosestButton()
 {
-  double min = getMouseButtonDistance(0);
+  double min = closestThreshold;
   int index = -1;
-  for(int i=1; i<16; ++i) {
+  for(int i=0; i<16; ++i) {
     double dist = getMouseButtonDistance(i);
-    if(dist < min && dist < 100d) { // 100 is the threshold
+    if(dist < min && dist < closestThreshold) { // threshold
       min = dist;
       index = i;
     }
