@@ -165,7 +165,7 @@ void mousePressed() // test to see if hit was in target!
     misses++;
   }  
   String outputLine = trialNum + 1 + "," + userID + "," + cursorXBeforeTrial + "," + cursorYBeforeTrial + "," + (bounds.x+(bounds.width)/2) + "," + (bounds.y+(bounds.height)/2) + "," + 
-    bounds.width + "," + (millis() - lastTrialTime) + "," + (isHit?1:0); // success
+    bounds.width + "," + (millis() - lastTrialTime)*1.0/1000.0 + "," + (isHit?1:0); // success
   System.out.println(outputLine);
   output.println(outputLine);
   
